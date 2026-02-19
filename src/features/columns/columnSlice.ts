@@ -1,17 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
 import { v4 as uuid } from "uuid";
 import type { Column } from "../types";
 
-interface ColumnState extends Column {
-  // additional fields can go here if needed
-}
+interface ColumnState extends Column {}
 
-const initialState: ColumnState[] = [
-  { id: "todo", title: "Todo", boardId: "default" },
-  { id: "inprogress", title: "In Progress", boardId: "default" },
-  { id: "done", title: "Done", boardId: "default" },
-];
+const initialState: ColumnState[] = [];
 
 const columnSlice = createSlice({
   name: "columns",
@@ -29,6 +22,19 @@ const columnSlice = createSlice({
       });
     },
 
+    // Create default columns for a new board
+    createDefaultColumns: (
+      state,
+      action: PayloadAction<{ boardId: string }>
+    ) => {
+      const { boardId } = action.payload;
+      state.push(
+        { id: uuid(), title: "Todo", boardId },
+        { id: uuid(), title: "In Progress", boardId },
+        { id: uuid(), title: "Done", boardId }
+      );
+    },
+
     // Delete a column by id
     deleteColumn: (state, action: PayloadAction<string>) => {
       const index = state.findIndex((col) => col.id === action.payload);
@@ -41,8 +47,6 @@ const columnSlice = createSlice({
       action: PayloadAction<{ oldIndex: number; newIndex: number }>
     ) => {
       const { oldIndex, newIndex } = action.payload;
-
-      // Safety checks
       if (
         oldIndex < 0 ||
         newIndex < 0 ||
@@ -58,5 +62,6 @@ const columnSlice = createSlice({
   },
 });
 
-export const { createColumn, deleteColumn, reorderColumns } = columnSlice.actions;
+export const { createColumn, deleteColumn, reorderColumns, createDefaultColumns } =
+  columnSlice.actions;
 export default columnSlice.reducer;

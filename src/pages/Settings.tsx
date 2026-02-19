@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
 import { createColumn, deleteColumn, reorderColumns } from "@/features/columns/columnSlice";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TrashIcon, Bars3Icon } from "@heroicons/react/24/outline";
@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// Sortable item component for columns
+// Sortable column component
 function SortableColumn({ col, onDelete }: { col: any; onDelete: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: col.id });
 
@@ -60,6 +60,15 @@ export default function Settings() {
 
   const [name, setName] = useState("");
 
+  // Automatically create default columns when a new board is selected
+  useEffect(() => {
+    if (activeBoardId && columns.length === 0) {
+      dispatch(createColumn({ title: "Todo", boardId: activeBoardId }));
+      dispatch(createColumn({ title: "In Progress", boardId: activeBoardId }));
+      dispatch(createColumn({ title: "Done", boardId: activeBoardId }));
+    }
+  }, [activeBoardId, columns.length, dispatch]);
+
   const handleCreateColumn = () => {
     if (!name.trim() || !activeBoardId) return;
     dispatch(createColumn({ title: name, boardId: activeBoardId }));
@@ -83,7 +92,6 @@ export default function Settings() {
     <div className="p-6">
       <h1 className="text-xl font-semibold mb-4">Board States</h1>
 
-      {/* DndContext for reordering states */}
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={columns.map((col) => col.id)} strategy={verticalListSortingStrategy}>
           <div className="mb-4 space-y-2">
@@ -100,7 +108,6 @@ export default function Settings() {
         </SortableContext>
       </DndContext>
 
-      {/* Input to create new state */}
       <div className="flex gap-2 mt-2">
         <Input
           placeholder="New State Name"
