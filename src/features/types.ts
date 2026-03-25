@@ -16,6 +16,6 @@ export interface Task {
   deadline: string;
   priority: "Low" | "Medium" | "High";
   assignee: string;
-  columnId: string;
+  columnId?: string;
 }
 export type Priority = "Low" | "Medium" | "High";
