@@ -1,73 +1,24 @@
-# React + TypeScript + Vite
+# Planora – Formstack Integration
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite app with lightweight Formstack embed + read-only submissions feed.
 
-Currently, two official plugins are available:
+## What the Formstack pieces do
+- Form embed: `src/components/FormstackEmbed.tsx` renders an iframe pointing to `FORMSTACK_EMBED_URL` from `src/lib/formstack.ts`. Swap that constant for your public Formstack form share link.
+- Submission feed: `src/components/FormstackReportEmbed.tsx` fetches a Formstack shared report via the read-only proxy URL `FORMSTACK_REPORT_PROXY` (also in `src/lib/formstack.ts`). It pulls plain text through `jina.ai` to dodge CORS and heuristically splits each line into Title / Description / Deadline / Assignee.
+- Where it shows up: `src/pages/Home.tsx` renders both the board and the Formstack report widget.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How to point at your own Formstack assets
+1) Create a Formstack form and copy its public embed/share URL. Set `FORMSTACK_EMBED_URL` in `src/lib/formstack.ts`.
+2) Create a Formstack report, make it publicly shareable, and copy its share URL. Set `FORMSTACK_REPORT_PROXY` to that URL; the component appends a cache-busting `t` query param.
+3) If your report line format differs, tweak `splitDetails`/`parseLines` in `FormstackReportEmbed.tsx` to map fields correctly.
+4) For production, replace the jina.ai proxy with a server-side fetch to keep the report link private.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Running locally
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Notes
+- `.env*` files, coverage output, and local build artifacts are ignored in Git (see `.gitignore`).
+- Vite aliases `@` to `src/` (see `vite.config.ts`).
